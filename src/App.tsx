@@ -171,7 +171,7 @@ function App() {
               <div className="space-y-1">
                 <div><span className="font-semibold">PSW:</span></div>
                 <div className="grid grid-cols-4 gap-1">
-                  {(['I','U','PM','O','S','Z','C'] as const).map(flag => (
+                  {(['I', 'U', 'PM', 'O', 'S', 'Z', 'C'] as const).map(flag => (
                     <span
                       key={flag}
                       className={`px-2 py-1 rounded text-center ${snapshot.psw[flag] ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}
