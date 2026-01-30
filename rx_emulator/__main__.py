@@ -5,9 +5,11 @@ Usage:
     python -m rx_emulator [options] [program]
 
 Options:
-    -d, --debug     Start in debug mode
-    -r, --run       Run program immediately
-    -h, --help      Show help
+    -d, --debug       Start in debug mode
+    -r, --run         Run program immediately
+    --visual          Visual UI mode (requires rich library)
+    --schematic       Show schematic diagrams
+    -h, --help        Show help
 """
 
 import argparse
@@ -28,6 +30,8 @@ Examples:
     python -m rx_emulator -r program.bin        # Load and run
     python -m rx_emulator -d                    # Start empty debugger
     python -m rx_emulator --demo                # Run demo program
+    python -m rx_emulator --visual              # Visual UI mode
+    python -m rx_emulator --schematic           # Show block diagrams
 """
     )
 
@@ -37,12 +41,43 @@ Examples:
     parser.add_argument('-a', '--address', type=lambda x: int(x, 0), default=None,
                         help='Load address for binary files (hex, e.g., 0xFFE00000)')
     parser.add_argument('--demo', action='store_true', help='Run demo program')
+    parser.add_argument('--visual', action='store_true', help='Visual UI mode with board display')
+    parser.add_argument('--schematic', action='store_true', help='Show schematic/block diagrams')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
 
     args = parser.parse_args()
 
     # エミュレータ作成
     emu = RX65NEmulator()
+
+    # 回路図モード
+    if args.schematic:
+        print("RX65N Virtual Emulator - Schematic View")
+        print("=" * 40)
+        load_demo_program(emu)
+        from .schematic import print_schematic_demo
+        print_schematic_demo(emu)
+        return
+
+    # ビジュアルUIモード
+    if args.visual:
+        try:
+            from .visual_ui import RichVisualUI, SimpleVisualUI, RICH_AVAILABLE
+            if RICH_AVAILABLE:
+                ui = RichVisualUI(emu)
+                ui.run_interactive()
+            else:
+                print("Note: 'rich' library not installed. Using simple UI.")
+                print("Install with: pip install rich")
+                ui = SimpleVisualUI(emu)
+                ui.run_interactive()
+        except Exception as e:
+            print(f"Error starting visual UI: {e}")
+            print("Falling back to simple visual UI...")
+            from .visual_ui import SimpleVisualUI
+            ui = SimpleVisualUI(emu)
+            ui.run_interactive()
+        return
 
     print("RX65N Virtual Emulator v0.1.0")
     print("=" * 40)
